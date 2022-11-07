@@ -216,12 +216,7 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
 
     listEl.innerHTML = "";
     for (const projItem of this.assignedProjects) {
-      // instead of creating a list item like this, I can instantiate projectItem class and in the constructor of projectItem class, do all the initialization and so on
-      const listItem = document.createElement("li");
-
-      // every projItem is a newProject from the ProjectState (has title, descr and people)
-      listItem.textContent = projItem.title;
-      listEl.appendChild(listItem);
+      new ProjectItem(this.element.querySelector("ul")!.id, projItem);
     }
   }
 }
@@ -232,7 +227,14 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
   // We want to store the project that belongs to the rendered project item (based on the ProjectClass) in the ProjectItemClass:
   private project: Project;
 
-  // We need to get the ID of the element where the project item should be rendered in (hostID) and this ID is not fixed because we have two lists where the item could be render to (active and finished). We also need the ID of the element itself. So I expect to get that IDs in the constructor
+  get persons() {
+    if (this.project.people === 1) {
+      return "1 person";
+    } else {
+      return `${this.project.people} people`;
+    }
+  }
+
   constructor(hostID: string, project: Project) {
     super("single-project", hostID, false, project.id);
     this.project = project;
@@ -241,10 +243,10 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
     this.renderContent();
   }
   configure(): void {}
-  renderContent(): void {
-    const title = document.querySelector("h2") as HTMLElement;
-    const description = document.querySelector("h3") as HTMLElement;
-    const people = document.querySelector("p") as HTMLElement;
+  renderContent() {
+    this.element.querySelector("h2")!.textContent = this.project.title;
+    this.element.querySelector("h3")!.textContent = this.persons + " assigned";
+    this.element.querySelector("p")!.textContent = this.project.description;
   }
 }
 
