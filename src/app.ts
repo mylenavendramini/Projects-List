@@ -1,12 +1,3 @@
-// Code goes here!
-
-// 1) Render the form:
-
-// a) Get access to the template
-// b) Get access to the form
-// c) Get access to the div "app"
-// d) Render the template in the div
-
 enum ProjectStatus {
   Active,
   Finished,
@@ -65,7 +56,6 @@ class ProjectState extends State<Project> {
     this.projects.push(newProject);
     // All the time something changes, like adding a new project, we call all the listeners functions:
     for (const listenerFn of this.listeners) {
-      // we can execute listenerFn like a function, because it's a function, and pass as an argument what is relevant for it based on the state we are managing and in this case is "projects" (project list). The "projects" is the state that the class ProjectState is responsible for.
       // slice() = create a new copy of the array
       listenerFn(this.projects.slice());
       // Now every listener function is getting executed and gets a copy of the projects
@@ -75,7 +65,7 @@ class ProjectState extends State<Project> {
 
 // global instance which I can use from the entire file:
 const projectState = ProjectState.getInstance();
-// With the projectState, I call addProjec() in the ProjectInput (when click the button) and pass the update list of projects to ProjectList whenever it changes (projectState.addListener)
+// With the projectState, I call addProject() in the ProjectInput (when click the button) and pass the update list of projects to ProjectList whenever it changes (projectState.addListener)
 
 interface Validatable {
   value: string | number;
@@ -162,7 +152,7 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
     }
     // this.configure();
     // this.renderContent()
-    // Why not call confifure and renderContent here? Because then we might call a method in the inheriting class where the confifure and renderContent relies on something where the constructor of the inheriting class actually maybe set something up only after the Component Class constructor finished. That's why we call in the inheriting classes.
+
     this.attach(insertAtStart);
   }
 
@@ -226,10 +216,9 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
 
     listEl.innerHTML = "";
     for (const projItem of this.assignedProjects) {
-      // instead of creating a list item like this, instantiate projectItem class and in the constructor of projectItem class, do all the initialization and so on
-      // const listItem = document.createElement("li");
-      const newProjectItem = new ProjectItem();
-      const listItem = document.createElement(newProjectItem);
+      // instead of creating a list item like this, I can instantiate projectItem class and in the constructor of projectItem class, do all the initialization and so on
+      const listItem = document.createElement("li");
+
       // every projItem is a newProject from the ProjectState (has title, descr and people)
       listItem.textContent = projItem.title;
       listEl.appendChild(listItem);
