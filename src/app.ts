@@ -38,7 +38,6 @@ class State<T> {
   }
 }
 
-// Create a class that manages the state of the application and allow me to setup listeners in different parts of the application. I only want to have one instance of this class (getInstance())
 // Project State management:
 
 class ProjectState extends State<Project> {
@@ -67,9 +66,21 @@ class ProjectState extends State<Project> {
       ProjectStatus.Active
     );
     this.projects.push(newProject);
-    // All the time something changes, like adding a new project, we call all the listeners functions:
+    this.updateListeners();
+  }
+
+  // Switch the status of a project:
+  moveProject(projectID: string, newStatus: ProjectStatus) {
+    const project = this.projects.find((proj) => proj.id === projectID);
+    if (project && project.status !== newStatus) {
+      project.status = newStatus;
+      this.updateListeners();
+    }
+  }
+
+  // All the time something changes, like adding a new project, we call all the listeners functions:
+  private updateListeners() {
     for (const listenerFn of this.listeners) {
-      // slice() = create a new copy of the array
       listenerFn(this.projects.slice());
       // Now every listener function is getting executed and gets a copy of the projects
     }
@@ -78,7 +89,6 @@ class ProjectState extends State<Project> {
 
 // global instance which I can use from the entire file:
 const projectState = ProjectState.getInstance();
-// With the projectState, I call addProject() in the ProjectInput (when click the button) and pass the update list of projects to ProjectList whenever it changes (projectState.addListener)
 
 interface Validatable {
   value: string | number;
@@ -125,7 +135,7 @@ function validate(validatableInput: Validatable) {
   return isValid;
 }
 
-function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
+function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
   const value = descriptor.value;
   const adjustedDescriptor = {
     configurable: true,
@@ -139,7 +149,6 @@ function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
 }
 
 // Component Base Class that has shared functionalities which the classes that render something to the DOM have in commom:
-// Because hostElement can be HTMLDivElement or anything else and element can be HTMLElement in one class, HTMLFormElement in another one, for example, we can set generic types where when we inherit from it, we can set the concrete types.
 abstract class Component<T extends HTMLElement, U extends HTMLElement> {
   templateEl: HTMLTemplateElement;
   hostElement: T;
@@ -163,15 +172,10 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
     if (newElementID) {
       this.element.id = newElementID;
     }
-    // this.configure();
-    // this.renderContent()
 
     this.attach(insertAtStart);
   }
 
-  //   private attach() {
-  //   this.divEl.insertAdjacentElement("beforeend", this.sectionEl);
-  // }
   private attach(insertAt: boolean) {
     this.hostElement.insertAdjacentElement(
       // "beforeend": false; "afterbegin": true
@@ -183,6 +187,51 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 
   abstract configure(): void;
   abstract renderContent(): void;
+}
+
+// Render project item
+class ProjectItem
+  extends Component<HTMLUListElement, HTMLLIElement>
+  implements Draggable
+{
+  private project: Project;
+
+  get persons() {
+    if (this.project.people === 1) {
+      return "1 person";
+    } else {
+      return `${this.project.people} people`;
+    }
+  }
+
+  constructor(hostID: string, project: Project) {
+    super("single-project", hostID, false, project.id);
+    this.project = project;
+
+    this.configure();
+    this.renderContent();
+  }
+
+  @autobind
+  dragStartHandler(event: DragEvent) {
+    event.dataTransfer!.setData("text/plain", this.project.id);
+    event.dataTransfer!.effectAllowed = "move";
+  }
+
+  dragEndHandler(_: DragEvent) {
+    console.log("DragEnd");
+  }
+
+  // Listen to the dragStart Event:
+  configure() {
+    this.element.addEventListener("dragstart", this.dragStartHandler);
+    this.element.addEventListener("dragend", this.dragEndHandler);
+  }
+  renderContent() {
+    this.element.querySelector("h2")!.textContent = this.project.title;
+    this.element.querySelector("h3")!.textContent = this.persons + " assigned";
+    this.element.querySelector("p")!.textContent = this.project.description;
+  }
 }
 
 // Reachout the template and render list of projects
@@ -201,19 +250,25 @@ class ProjectList
   }
 
   // Drop area:
-  @Autobind
-  dragOverHandler(_: DragEvent): void {
-    // event.preventDefault();
-    const listEl = this.element.querySelector("ul")!;
-    listEl.classList.add("droppable");
+  @autobind
+  dragOverHandler(event: DragEvent) {
+    if (event.dataTransfer && event.dataTransfer.types[0] === "text/plain") {
+      event.preventDefault();
+      const listEl = this.element.querySelector("ul")!;
+      listEl.classList.add("droppable");
+    }
   }
-  @Autobind
-  dropHandler(_: DragEvent): void {
-    // event.preventDefault();
+  @autobind
+  dropHandler(event: DragEvent) {
+    const projID = event.dataTransfer!.getData("text/plain");
+    // change the project status:
+    projectState.moveProject(
+      projID,
+      this.type === "active" ? ProjectStatus.Active : ProjectStatus.Finished
+    );
   }
-  @Autobind
-  dragLeaveHandler(_: DragEvent): void {
-    // event.preventDefault();
+  @autobind
+  dragLeaveHandler(_: DragEvent) {
     const listEl = this.element.querySelector("ul")!;
     listEl.classList.remove("droppable");
   }
@@ -253,51 +308,6 @@ class ProjectList
     for (const projItem of this.assignedProjects) {
       new ProjectItem(this.element.querySelector("ul")!.id, projItem);
     }
-  }
-}
-
-// Render project item
-
-class ProjectItem
-  extends Component<HTMLUListElement, HTMLLIElement>
-  implements Draggable
-{
-  private project: Project;
-
-  get persons() {
-    if (this.project.people === 1) {
-      return "1 person";
-    } else {
-      return `${this.project.people} people`;
-    }
-  }
-
-  constructor(hostID: string, project: Project) {
-    super("single-project", hostID, false, project.id);
-    this.project = project;
-
-    this.configure();
-    this.renderContent();
-  }
-
-  @Autobind
-  dragStartHandler(_: DragEvent): void {
-    // event.preventDefault();
-  }
-  dragEndHandler(_: DragEvent): void {
-    // event.preventDefault();
-    console.log("DragEnd");
-  }
-
-  // Listen to the dragStart Event:
-  configure(): void {
-    this.element.addEventListener("dragstart", this.dragStartHandler);
-    this.element.addEventListener("dragend", this.dragEndHandler);
-  }
-  renderContent() {
-    this.element.querySelector("h2")!.textContent = this.project.title;
-    this.element.querySelector("h3")!.textContent = this.persons + " assigned";
-    this.element.querySelector("p")!.textContent = this.project.description;
   }
 }
 
@@ -384,7 +394,7 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
     this.peopleInput.value = "";
   }
 
-  @Autobind
+  @autobind
   private submitHandler(e: Event) {
     e.preventDefault();
     // reach out all the inputs, gather the user input there, validate it and return it
