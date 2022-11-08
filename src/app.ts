@@ -1,3 +1,16 @@
+// Drag and drop interfaces:
+
+interface Draggable {
+  dragStartHandler(event: DragEvent): void;
+  dragEndHandler(event: DragEvent): void;
+}
+
+interface DragTarget {
+  dragOverHandler(event: DragEvent): void;
+  dropHandler(event: DragEvent): void;
+  dragLeaveHandler(event: DragEvent): void;
+}
+
 enum ProjectStatus {
   Active,
   Finished,
@@ -173,7 +186,10 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 }
 
 // Reachout the template and render list of projects
-class ProjectList extends Component<HTMLDivElement, HTMLElement> {
+class ProjectList
+  extends Component<HTMLDivElement, HTMLElement>
+  implements DragTarget
+{
   assignedProjects: Project[];
 
   constructor(private type: "active" | "finished") {
@@ -184,11 +200,30 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
     this.renderContent();
   }
 
-  // This configure() wasn't here before, we had to add because the Component Class ask to have in any extended class. So, I could get my addListener that was inside the constructior and put inside the configure function:
+  // Drop area:
+  @Autobind
+  dragOverHandler(_: DragEvent): void {
+    // event.preventDefault();
+    const listEl = this.element.querySelector("ul")!;
+    listEl.classList.add("droppable");
+  }
+  @Autobind
+  dropHandler(_: DragEvent): void {
+    // event.preventDefault();
+  }
+  @Autobind
+  dragLeaveHandler(_: DragEvent): void {
+    // event.preventDefault();
+    const listEl = this.element.querySelector("ul")!;
+    listEl.classList.remove("droppable");
+  }
+
   configure() {
+    this.element.addEventListener("dragover", this.dragOverHandler);
+    this.element.addEventListener("dragleave", this.dragLeaveHandler);
+    this.element.addEventListener("drop", this.dropHandler);
     // Register a listener function:
     projectState.addListener((projects: Project[]) => {
-      // We know that this function gets a list of projects because thats what we stablished in the ProjectState (const listenerFn of this.listeners)
       // Before store the projects, I want to filter them:
       const relevantProjects = projects.filter((proj) => {
         if (this.type === "active") {
@@ -223,8 +258,10 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
 
 // Render project item
 
-class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
-  // We want to store the project that belongs to the rendered project item (based on the ProjectClass) in the ProjectItemClass:
+class ProjectItem
+  extends Component<HTMLUListElement, HTMLLIElement>
+  implements Draggable
+{
   private project: Project;
 
   get persons() {
@@ -242,7 +279,21 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
     this.configure();
     this.renderContent();
   }
-  configure(): void {}
+
+  @Autobind
+  dragStartHandler(_: DragEvent): void {
+    // event.preventDefault();
+  }
+  dragEndHandler(_: DragEvent): void {
+    // event.preventDefault();
+    console.log("DragEnd");
+  }
+
+  // Listen to the dragStart Event:
+  configure(): void {
+    this.element.addEventListener("dragstart", this.dragStartHandler);
+    this.element.addEventListener("dragend", this.dragEndHandler);
+  }
   renderContent() {
     this.element.querySelector("h2")!.textContent = this.project.title;
     this.element.querySelector("h3")!.textContent = this.persons + " assigned";
@@ -348,7 +399,6 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
 
       this.clearInputs();
     }
-    // do something with the input values
   }
 }
 
