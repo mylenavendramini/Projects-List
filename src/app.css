@@ -3,7 +3,7 @@
 }
 
 html {
-  font-family: sans-serif;
+  font-family: "Courier New", Courier, monospace;
 }
 
 body {
@@ -27,21 +27,22 @@ textarea {
   padding: 0.2rem 0.4rem;
   width: 100%;
   max-width: 30rem;
-  border: 1px solid #ccc;
+  border: 1px solid black;
 }
 
 input:focus,
 textarea:focus {
   outline: none;
-  background: #fff5f9;
+  background: white;
 }
 
 button {
   font: inherit;
-  background: #ff0062;
-  border: 1px solid #ff0062;
+  background: #ffd600;
+  border: 1px solid #ffd600;
   cursor: pointer;
-  color: white;
+  color: black;
+  font-weight: bold;
   padding: 0.75rem 1rem;
 }
 
@@ -51,17 +52,17 @@ button:focus {
 
 button:hover,
 button:active {
-  background: #a80041;
-  border-color: #a80041;
+  background: #ffd600;
+  border-color: #ffd600;
 }
 
 .projects {
   margin: 1rem;
-  border: 1px solid #ff0062;
+  border: 1px solid #ffd600;
 }
 
 .projects header {
-  background: #ff0062;
+  background: #ffd600;
   height: 3.5rem;
   display: flex;
   justify-content: center;
@@ -69,16 +70,16 @@ button:active {
 }
 
 #finished-projects {
-  border-color: #0044ff;
+  border-color: #f6e71d;
 }
 
 #finished-projects header {
-  background: #0044ff;
+  background: #f6e71d;
 }
 
 .projects h2 {
   margin: 0;
-  color: white;
+  color: black;
 }
 
 .projects ul {
@@ -91,38 +92,39 @@ button:active {
   box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.26);
   padding: 1rem;
   margin: 1rem;
-  background-color: white;
+  background-color: black;
 }
 
 .projects li h2 {
-  color: #ff0062;
+  color: #ffd600;
   margin: 0.5rem 0;
 }
 
 #finished-projects li h2 {
-  color: #0044ff;
+  color: #f6e71d;
 }
 
 .projects li h3 {
-  color: #575757;
+  color: white;
   font-size: 1rem;
 }
 
 .project li p {
   margin: 0;
+  color: white;
 }
 
 .droppable {
-  background: #ffe3ee;
+  background: #f6e71d;
 }
 
 #finished-projects .droppable {
-  background: #d6e1ff;
+  background: #ffd600;
 }
 
 #user-input {
   margin: 1rem;
   padding: 1rem;
-  border: 1px solid #ff0062;
-  background: #f7f7f7;
+  border: 1px solid #ffd600;
+  background: white;
 }
