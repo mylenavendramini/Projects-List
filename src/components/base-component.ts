@@ -1,5 +1,8 @@
 // Component Base Class that has shared functionalities which the classes that render something to the DOM have in commom:
-export abstract class Component<T extends HTMLElement, U extends HTMLElement> {
+export default abstract class Component<
+  T extends HTMLElement,
+  U extends HTMLElement
+> {
   templateEl: HTMLTemplateElement;
   hostElement: T;
   element: U;
