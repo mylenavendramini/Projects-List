@@ -19,17 +19,12 @@
 </details>
 
 
-
-https://user-images.githubusercontent.com/93344031/204800144-975b3e12-3e9f-4dce-82f5-29d087ab2cfd.mov
-
-
-
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
 Simple project using Typescript. The user can interact with the page, adding projects to the list and dragging them from one box to another.
 
-
+https://user-images.githubusercontent.com/93344031/204800144-975b3e12-3e9f-4dce-82f5-29d087ab2cfd.mov
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
